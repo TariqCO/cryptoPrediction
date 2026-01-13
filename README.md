@@ -12,6 +12,9 @@ A **web-based cryptocurrency prediction platform** that allows users to submit t
 
 * **AI-Powered Analysis**
   Integrates **Gemini AI** to analyze all user predictions and generate comprehensive summaries, common trends, and actionable verdicts.
+  
+* **Tracking Prediction Status **
+  Real-time tracking of prediction status, helping users monitor outcomes and make informed decisions.
 
 * **Live Cryptocurrency Rates**
   Real-time tracking of cryptocurrency prices with automatic updates, helping users make informed predictions.
@@ -32,7 +35,3 @@ A **web-based cryptocurrency prediction platform** that allows users to submit t
 * Combines **community-driven predictions** with **AI-powered analysis**.
 * Tracks **live crypto market trends** for accurate decision-making.
 * Easy-to-use interface with a **professional and interactive dashboard**.
-
-
-
-Do you want me to do that too?
