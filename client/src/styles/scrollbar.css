@@ -1,0 +1,18 @@
+/* Slim, neutral scrollbar for Chrome/Edge/Safari */
+.custom-scroll::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.custom-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scroll::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;       /* slate‑300 */
+  border-radius: 4px;
+}
+
+/* Firefox */
+.custom-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
