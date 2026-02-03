@@ -1,12 +1,9 @@
 import { useEffect, useState } from "react";
 import moment from "moment";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { TrashIcon } from "@radix-ui/react-icons";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -17,7 +14,6 @@ import {
 import LiveCryptoPrice from "../components/ui/LiveCryptoPrice";
 import { deletePrediction, usersPrediction } from "../api/user";
 import { toast } from "react-toastify";
-import { TrendingUp, TrendingDown, CheckCircle, XCircle, Clock } from "lucide-react";
 
 const MyPredictions = () => {
   const [userData, setUserData] = useState([]);
@@ -25,90 +21,94 @@ const MyPredictions = () => {
   const [sortBy, setSortBy] = useState("latest");
 
   useEffect(() => {
-    fetchPredictions();
+    fetchProfile();
   }, [sortBy]);
 
-  const fetchPredictions = async () => {
+  const fetchProfile = async () => {
     try {
       const res = await usersPrediction();
       let sorted = [...res];
-
-      if (sortBy === "latest")
+      if (sortBy === "latest") {
         sorted.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-      if (sortBy === "fulfilled")
+      } else if (sortBy === "fulfilled") {
         sorted.sort(
-          (a, b) =>
-            new Date(b.fulfilledAt || 0) - new Date(a.fulfilledAt || 0)
+          (a, b) => new Date(b.fulfilledAt || 0) - new Date(a.fulfilledAt || 0)
         );
-      if (sortBy === "confidence")
+      } else if (sortBy === "confidence") {
         sorted.sort((a, b) => b.confidence - a.confidence);
-
+      }
       setUserData(sorted);
     } catch (err) {
-      console.error(err);
+      console.error("Failed to load profile", err);
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = (slug, timeframe) => {
-    toast(
+    const toastId = toast(
       ({ closeToast }) => (
-        <div className="space-y-3">
-          <p className="text-sm font-medium">Delete this prediction permanently?</p>
-          <div className="flex justify-end gap-2">
+        <div className="space-y-2">
+          <p className="text-sm font-medium">
+            Are you sure you want to delete this prediction?
+          </p>
+          <div className="flex gap-2 justify-end">
             <Button
-              size="sm"
               variant="destructive"
+              size="sm"
               onClick={async () => {
                 try {
                   await deletePrediction(slug, timeframe);
-                  setUserData((p) => p.filter((i) => i.slug !== slug));
-                  toast.success("Prediction deleted");
-                } catch {
-                  toast.error("Failed to delete");
+                  setUserData((prev) => prev.filter((p) => p.slug !== slug));
+                  toast.success("✅ Prediction deleted successfully!");
+                } catch (err) {
+                  console.error(err);
+                  toast.error("❌ Failed to delete prediction.");
                 }
-                closeToast();
+                toast.dismiss(toastId);
               }}
             >
-              Delete
+              Yes
             </Button>
-            <Button size="sm" variant="secondary" onClick={closeToast}>
-              Cancel
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => toast.dismiss(toastId)}
+            >
+              No
             </Button>
           </div>
         </div>
       ),
-      { autoClose: false, closeButton: false }
+      {
+        closeOnClick: false,
+        autoClose: false,
+        closeButton: false,
+      }
     );
   };
 
   if (loading)
     return (
-      <div className="p-10 text-center text-muted-foreground">
-        Loading predictions…
+      <div className="p-8 text-center text-zinc-700 dark:text-zinc-200">
+        ⏳ Loading predictions...
       </div>
     );
-
   if (!userData.length)
     return (
-      <div className="p-10 text-center text-red-500">
-        No predictions found.
-      </div>
+      <div className="p-8 text-center text-red-500">No predictions found.</div>
     );
 
   return (
-    <div className="min-h-screen bg-white dark:bg-zinc-950 px-4 py-10">
-      <div className="max-w-7xl mx-auto space-y-8">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between gap-4">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 text-zinc-900 dark:text-white px-4 py-10 transition-colors">
+      <div className="max-w-7xl mx-auto space-y-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">My Predictions</h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Track performance, confidence & outcomes in real-time
+            <h1 className="text-4xl font-bold">📊 My Predictions</h1>
+            <p className="text-zinc-600 dark:text-zinc-400 mt-1">
+              Track your predictions and their outcomes in real-time.
             </p>
           </div>
-
           <Select value={sortBy} onValueChange={setSortBy}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Sort by" />
@@ -121,60 +121,128 @@ const MyPredictions = () => {
           </Select>
         </div>
 
-        {/* Grid */}
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {userData.map((p) => (
+          {userData.map((prediction, idx) => (
             <Card
-              key={p.slug}
-              className="group relative bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:shadow-xl transition-all"
+              key={idx}
+              className="relative bg-zinc-100 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 shadow hover:shadow-lg hover:-translate-y-1 transition-all"
             >
-              {/* Delete */}
-              <DeleteButton onDelete={() => handleDelete(p.slug, p.timeframe)} />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                onClick={() => handleDelete(prediction.slug, prediction.timeframe)}
+              >
+                <TrashIcon className="w-4 h-4" />
+              </Button>
 
-              <CardHeader className="pb-3">
-                <div className="flex items-center gap-3">
-                  <img
-                    src={p.logo || "/default-icon.png"}
-                    alt={p.symbol}
-                    className="w-10 h-10 rounded-full border bg-white"
-                  />
-
-                  <div className="flex-1">
-                    <CardTitle className="flex items-center gap-2 text-lg">
-                      {p.symbol}
-                      {p.direction === "positive" ? (
-                        <TrendingUp className="w-4 h-4 text-green-500" />
-                      ) : (
-                        <TrendingDown className="w-4 h-4 text-red-500" />
-                      )}
-                    </CardTitle>
-                    <p className="text-xs text-muted-foreground">
-                      Target ${p.targetPrice}
-                    </p>
-                  </div>
-
-                  <StatusBadge status={p.outcome} />
-                </div>
+              <CardHeader className="flex items-center gap-2 pb-2">
+                <img
+                  src={prediction.logo || "/default-icon.png"}
+                  alt={prediction.symbol}
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = "/default-icon.png";
+                  }}
+                  className="w-9 h-9 rounded-full object-contain border border-zinc-300 dark:border-zinc-600"
+                />
+                <CardTitle className="text-xl font-semibold">
+                  {prediction.symbol}
+                </CardTitle>
               </CardHeader>
 
-              <CardContent className="space-y-4 text-sm">
-                <Stat label="Voted At" value={`$${p.priceWhenVoting || "—"}`} />
-                <Stat label="Current" value={<LiveCryptoPrice coinName={p.symbol} />} />
-                <Stat label="Timeframe" value={formatTimeframe(p.timeframe)} />
-                <Stat label="Created" value={moment(p.createdAt).format("MMM D, YYYY")} />
-
-                {/* Confidence */}
+              <CardContent className="space-y-3 text-sm text-zinc-800 dark:text-zinc-200">
+                <div className="flex justify-between">
+                  <span>🎯 Target:</span>
+                  <span>${prediction.targetPrice}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>🗳 Voted At:</span>
+                  <span>${prediction.priceWhenVoting || "N/A"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>💰 Current:</span>
+                  <span>
+                    <LiveCryptoPrice coinName={prediction.symbol} />
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span>
+                    {prediction.direction === "positive" ? "⬆️" : "⬇️"}{" "}
+                    Direction:
+                  </span>
+                  <span
+                    className={
+                      prediction.direction === "positive"
+                        ? "text-green-500"
+                        : "text-red-500"
+                    }
+                  >
+                    {prediction.direction}
+                  </span>
+                </div>
                 <div>
-                  <div className="flex justify-between mb-1">
-                    <span className="text-xs text-muted-foreground">Confidence</span>
-                    <span className="text-xs font-medium">{p.confidence || 0}%</span>
-                  </div>
-                  <div className="h-2 w-full rounded bg-zinc-200 dark:bg-zinc-700">
+                  🧠 Confidence:
+                  <div className="mt-1 w-full h-2 rounded bg-zinc-300 dark:bg-zinc-700">
                     <div
-                      className="h-full rounded bg-gradient-to-r from-blue-500 to-indigo-500"
-                      style={{ width: `${p.confidence || 0}%` }}
+                      className={`h-full rounded ${
+                        prediction.confidence >= 70
+                          ? "bg-green-500"
+                          : prediction.confidence >= 40
+                          ? "bg-yellow-500"
+                          : "bg-red-500"
+                      }`}
+                      style={{ width: `${prediction.confidence || 0}%` }}
                     />
                   </div>
+                  <div className="text-xs text-right">
+                    {prediction.confidence || 0}%
+                  </div>
+                </div>
+                <div className="flex justify-between">
+                  <span>🕒 Timeframe:</span>
+                  <span>
+                    {prediction.timeframe === "24"
+                      ? "24 Hours"
+                      : prediction.timeframe === "7"
+                      ? "7 Days"
+                      : prediction.timeframe === "1"
+                      ? "1 Month"
+                      : `${prediction.timeframe}h`}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span>📅 Created:</span>
+                  <span>
+                    {moment(prediction.createdAt).format("YYYY-MM-DD h:mm A")}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span>⏱ Fulfilled At:</span>
+                  <span>
+                    {prediction.fulfilledAt
+                      ? moment(prediction.fulfilledAt).format(
+                          "YYYY-MM-DD h:mm A"
+                        )
+                      : "--"}
+                  </span>
+                </div>
+                <div className="mt-2">
+                  <Badge
+                    className={`text-white ${
+                      prediction.outcome === "fulfilled"
+                        ? "bg-green-600"
+                        : prediction.outcome === "expired"
+                        ? "bg-red-600"
+                        : "bg-yellow-500"
+                    }`}
+                  >
+                    {prediction.outcome === "fulfilled"
+                      ? "Fulfilled ✅"
+                      : prediction.outcome === "expired"
+                      ? "Expired ❌"
+                      : "Pending ⏳"}
+                  </Badge>
                 </div>
               </CardContent>
             </Card>
@@ -184,67 +252,5 @@ const MyPredictions = () => {
     </div>
   );
 };
-
-/* ---------- Reusable UI Parts ---------- */
-
-const Stat = ({ label, value }) => (
-  <div className="flex justify-between">
-    <span className="text-muted-foreground">{label}</span>
-    <span className="font-medium">{value}</span>
-  </div>
-);
-
-const formatTimeframe = (t) =>
-  t === "24" ? "24 Hours" : t === "7" ? "7 Days" : t === "1" ? "1 Month" : `${t}h`;
-
-const StatusBadge = ({ status }) => {
-  const map = {
-    fulfilled: {
-      text: "Fulfilled",
-      cls: "bg-green-100 text-green-800 border border-green-300",
-      icon: <CheckCircle className="w-4 h-4" />,
-    },
-    expired: {
-      text: "Expired",
-      cls: "bg-red-100 text-red-800 border border-red-300",
-      icon: <XCircle className="w-4 h-4" />,
-    },
-    pending: {
-      text: "Pending",
-      cls: "bg-yellow-100 text-yellow-800 border border-yellow-300",
-      icon: <Clock className="w-4 h-4" />,
-    },
-  };
-
-  const s = map[status] || map.pending;
-
-  return (
-    <span
-      className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-full ${s.cls}`}
-    >
-      {s.icon} {s.text}
-    </span>
-  );
-};
-
-const DeleteButton = ({ onDelete }) => (
-  <button
-    onClick={onDelete}
-    title="Delete prediction"
-    className="
-      absolute top-3 right-3
-      opacity-0 group-hover:opacity-100
-      transition-all duration-200
-      px-2.5 py-1.5 rounded-full
-      text-xs font-medium
-      text-red-500
-      bg-red-100/50 hover:bg-red-200/60
-      border border-red-200
-      backdrop-blur
-    "
-  >
-    Delete
-  </button>
-);
 
 export default MyPredictions;

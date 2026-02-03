@@ -2,7 +2,7 @@ import { CryptoModel } from "../models/cryptoModel.js";
 import { userModel } from "../models/userModel.js";
 import { getSummaryGemini } from "../services/genAi.js";
 
-
+/* ──────────────── 1. ADD USER PREDICTION ───────────────────────── */
 export const addVote = async (req, res) => {
   const { slug, heading, symbol, prediction } = req.body;
 

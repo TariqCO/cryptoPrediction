@@ -8,9 +8,6 @@ import {
   TrendingUp,
   TrendingDown,
   Users,
-  Brain,
-  BarChart3,
-  BarChart2,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -200,11 +197,9 @@ export default function RightSideBar({
 
         <CardContent className="flex-1 overflow-y-auto custom-scroll p-4 space-y-4">
           <div className="flex items-center justify-between gap-4 flex-wrap">
-<h2 className="flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
-  <BarChart2 className="w-5 h-5 text-orange-500" />
-  {title}
-</h2>
-
+            <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
+              📊 {title}
+            </h2>
             <div className="flex gap-2">
               {[
                 { label: "24h", value: "24" },
@@ -235,11 +230,9 @@ export default function RightSideBar({
           {error && <p className="text-sm text-red-500 font-medium">{error}</p>}
 
           <section className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-xl p-4 shadow-sm space-y-4 max-h-60 overflow-y-auto custom-scroll">
-<h3 className="text-sm font-semibold text-gray-800 dark:text-white flex items-center gap-2">
-  <Brain className="w-4 h-4 text-indigo-500" />
-  AI Summary
-</h3>
-
+            <h3 className="text-sm font-semibold text-gray-800 dark:text-white flex items-center gap-2">
+              🤖 AI Summary
+            </h3>
 
             {loading ? (
               <p className="text-sm text-gray-600 dark:text-gray-400 italic">
