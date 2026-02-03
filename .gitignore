@@ -1,2 +1,73 @@
-node_modules
-dist
+# =========================
+# Dependencies
+# =========================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# =========================
+# Environment variables
+# =========================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# =========================
+# Build outputs
+# =========================
+dist/
+build/
+.vite/
+.next/
+out/
+
+# =========================
+# Logs
+# =========================
+logs/
+*.log
+
+# =========================
+# Runtime data
+# =========================
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# =========================
+# OS / Editor files
+# =========================
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# =========================
+# Testing
+# =========================
+coverage/
+
+# =========================
+# Backend specific
+# =========================
+uploads/
+tmp/
+.cache/
+
+# =========================
+# Frontend specific
+# =========================
+.eslintcache
+.stylelintcache
+
+# =========================
+# Misc
+# =========================
+*.tgz
+*.bak

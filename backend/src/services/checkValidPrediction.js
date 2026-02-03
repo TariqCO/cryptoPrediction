@@ -1,14 +1,22 @@
 import { GoogleGenAI } from "@google/genai";
 import "dotenv/config";
 
-// 🧠 Initialize Gemini
 const gemini = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 /**
  * ✅ Validates if a prediction text aligns with the given direction.
- * Only returns `true` if AI is confident the text clearly supports the direction.
+ * Returns:
+ * - true  -> text clearly matches the direction
+ * - false -> text does NOT match the direction
+ * - 'quota_exceeded' -> API quota exceeded (429)
+ * - 'error' -> other errors occurred
  */
 export const checkValidPrediction = async ({ direction, text }) => {
+  if (!direction || !text) {
+    console.warn("⚠️ Missing direction or text for validation.");
+    return "error";
+  }
+
   const prompt = `
 You are a strict AI prediction validator. Given a market direction and a prediction text, determine if the text *clearly and directly* supports the specified direction:
 
@@ -24,16 +32,26 @@ Text: ${text}
 `;
 
   try {
-    const model = await gemini.models.generateContent({
+    const response = await gemini.models.generateContent({
       model: "gemini-2.5-flash",
       contents: prompt,
     });
 
-    const rawText = model.text?.toLowerCase().trim();
+    const rawText = response.text?.toLowerCase().trim();
 
-    return rawText === "true";
+    if (rawText === "true") return true;
+    if (rawText === "false") return false;
+
+    // If response is unexpected
+    console.warn("⚠️ Unexpected AI response for validation:", rawText);
+    return "error";
   } catch (error) {
-    console.error("❌ Error validating prediction with Gemini:", error.message);
-    return false; // Fail safe: assume invalid on error
+    if (error?.status === 429) {
+      console.error("⚠️ Gemini API quota exceeded:", error.message);
+      return "quota_exceeded";
+    }
+
+    console.error("❌ Error validating prediction with Gemini:", error?.message || error);
+    return "error";
   }
 };

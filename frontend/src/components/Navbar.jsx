@@ -1,17 +1,9 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logoutUser } from "../api/user";
-import {
-  Menu,
-  X,
-  Moon,
-  Sun,
-  LogOut,
-  User,
-  Settings,
-} from "lucide-react";
+import { Menu, X, Moon, Sun, LogOut, User, TrendingUp } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import AnimatedLogo from "./ui/AnimatedLogo";
 import { cn } from "@/lib/utils";
@@ -19,125 +11,105 @@ import { cn } from "@/lib/utils";
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [theme, setTheme] = useState(localStorage.getItem("theme") || "light");
+  const [theme, setTheme] = useState("light");
+  const dropdownRef = useRef(null);
 
   const currentUser = useSelector((s) => s.currentUser.user);
-
   const dispatch = useDispatch();
 
+  /* Theme */
   useEffect(() => {
-    document.documentElement.classList.toggle("dark", theme === "dark");
-    localStorage.setItem("theme", theme);
-  }, [theme]);
+    const stored = localStorage.getItem("theme") || "light";
+    setTheme(stored);
+    document.documentElement.classList.toggle("dark", stored === "dark");
+  }, []);
 
-  const toggleTheme = () =>
-    setTheme((prev) => (prev === "light" ? "dark" : "light"));
+  const toggleTheme = () => {
+    const next = theme === "light" ? "dark" : "light";
+    setTheme(next);
+    document.documentElement.classList.toggle("dark", next === "dark");
+    localStorage.setItem("theme", next);
+  };
 
-  const navItems = [
-    { to: "/predictions", label: "Predictions" },
-    { to: "/rankings", label: "Rankings" },
-    { to: "/leaderboard", label: "Leaderboard" },
-  ];
-
-  const renderLinks = (cls = "") =>
-    navItems.map(({ to, label }) => (
-      <NavLink
-        key={to}
-        to={to}
-        className={({ isActive }) =>
-          cn(
-            cls,
-            "flex-1 text-center px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200",
-            isActive
-              ? "bg-blue-100/60 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
-              : "text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-zinc-800"
-          )
-        }
-        onClick={() => setMobileOpen(false)}
-      >
-        {label}
-      </NavLink>
-    ));
+  /* Click outside dropdown */
+  useEffect(() => {
+    const handler = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
   return (
     <>
-      <nav className="sticky top-0 z-50 bg-white backdrop-blur-sm border-b border-gray-300 shadow-md dark:bg-zinc-950/70 dark:border-zinc-800 transition-colors">
-        <div className="max-w-7xl mx-auto flex h-16 items-center justify-between px-4">
+      <nav className="sticky top-0 z-50 bg-white/80 dark:bg-zinc-950/80 backdrop-blur border-b border-gray-200 dark:border-zinc-800">
+        <div className="max-w-7xl mx-auto h-16 flex items-center justify-between px-4">
+          {/* Logo */}
           <AnimatedLogo />
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-6">
-            {renderLinks("px-3 py-2")}
+          {/* Desktop Nav */}
+          <div className="hidden md:flex items-center gap-2">
+            <NavLink
+              to="/predictions"
+              className={({ isActive }) =>
+                cn(
+                  "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors",
+                  "bg-gray-100 dark:bg-zinc-800 text-gray-800 dark:text-gray-200",
+                  "hover:bg-gray-200 dark:hover:bg-zinc-700",
+                  isActive &&
+                    "bg-blue-600 text-white dark:bg-blue-500 dark:text-white"
+                )
+              }
+            >
+              <TrendingUp size={16} /> My Predictions
+            </NavLink>
           </div>
 
-          <div className="flex items-center gap-3 md:gap-4">
+          {/* Right Side */}
+          <div className="flex items-center gap-3">
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-md hover:bg-gray-200 dark:hover:bg-zinc-800 transition-colors text-gray-700 dark:text-gray-300 focus:outline-none focus:ring focus:ring-blue-300 dark:focus:ring-blue-700"
+              className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-zinc-800 transition"
             >
               {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
             </button>
 
-            {/* Auth / Profile */}
+            {/* Auth */}
             {!currentUser ? (
-              <div className="flex gap-2 items-center">
-                <Link
-                  to="/login"
-                  className="text-sm text-gray-700 dark:text-gray-300 hover:text-blue-600"
-                >
-                  Login
-                </Link>
-                <Link
-                  to="/register"
-                  className="bg-blue-600 text-white text-sm px-4 py-1.5 rounded-md hover:bg-blue-700"
-                >
-                  Register
-                </Link>
-              </div>
+              <Link
+                to="/login"
+                className="ml-2 px-4 py-2 rounded-full text-sm font-medium bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 transition"
+              >
+                Login
+              </Link>
             ) : (
-              <div className="relative">
+              <div ref={dropdownRef} className="relative">
                 <button
-                  onClick={() => setDropdownOpen(!dropdownOpen)}
-                  className="flex items-center gap-2 focus:outline-none"
+                  onClick={() => setDropdownOpen((p) => !p)}
+                  className="flex items-center gap-2"
                 >
                   <img
                     src={currentUser.profileImage || "/default.png"}
-                    alt="avatar"
-                    className="h-9 w-9 rounded-full object-cover ring-2 ring-blue-500/40 shadow-sm"
+                    className="h-9 w-9 rounded-full ring-2 ring-blue-500/40"
+                    alt="User"
                   />
                 </button>
 
-                {/* Dropdown Menu */}
                 <AnimatePresence>
                   {dropdownOpen && (
                     <motion.div
-                      initial={{ opacity: 0, y: -10 }}
+                      initial={{ opacity: 0, y: -8 }}
                       animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      className="absolute right-0 mt-3 z-50 w-48 rounded-xl bg-white/95 dark:bg-zinc-900 shadow-md border border-gray-200 dark:border-zinc-800 overflow-hidden"
+                      exit={{ opacity: 0, y: -8 }}
+                      className="absolute right-0 mt-3 w-52 rounded-xl bg-white dark:bg-zinc-900 shadow-xl border dark:border-zinc-800 overflow-hidden"
                     >
-                      <div className="absolute -top-2 right-5 w-3 h-3 bg-white/95 dark:bg-zinc-900 rotate-45 border-l border-t border-gray-200 dark:border-zinc-800"></div>
-                      <Link
-                        to="/profile"
-                        className="flex items-center gap-2 px-4 py-3 text-sm hover:bg-gray-100 dark:hover:bg-zinc-800 transition"
-                        onClick={() => setDropdownOpen(false)}
-                      >
-                        <User size={16} /> Profile
-                      </Link>
-                      <Link
-                        to="/settings"
-                        className="flex items-center gap-2 px-4 py-3 text-sm hover:bg-gray-100 dark:hover:bg-zinc-800 transition"
-                        onClick={() => setDropdownOpen(false)}
-                      >
-                        <Settings size={16} /> Settings
-                      </Link>
+                      <MenuItem to="/profile" icon={<User size={16} />} label="Profile" />
                       <button
-                        onClick={() => {
-                          logoutUser(dispatch);
-                          setDropdownOpen(false);
-                        }}
-                        className="flex w-full items-center gap-2 px-4 py-3 text-sm text-red-600 hover:bg-red-100/80 dark:hover:bg-zinc-800 transition"
+                        onClick={() => logoutUser(dispatch)}
+                        className="w-full flex items-center gap-2 px-4 py-3 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-zinc-800 transition"
                       >
                         <LogOut size={16} /> Logout
                       </button>
@@ -149,10 +121,10 @@ export default function Navbar() {
 
             {/* Mobile Toggle */}
             <button
-              onClick={() => setMobileOpen(!mobileOpen)}
-              className="md:hidden text-gray-700 dark:text-white focus:outline-none"
+              onClick={() => setMobileOpen((p) => !p)}
+              className="md:hidden"
             >
-              {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+              {mobileOpen ? <X /> : <Menu />}
             </button>
           </div>
         </div>
@@ -165,13 +137,29 @@ export default function Navbar() {
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
-            transition={{ duration: 0.25 }}
-            className="fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-zinc-950 border-t border-gray-300 dark:border-zinc-800 p-4 shadow-inner md:hidden"
+            className="fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-zinc-950 border-t dark:border-zinc-800 p-4 md:hidden"
           >
-            <div className="flex flex-col space-y-3">{renderLinks()}</div>
+            <NavLink
+              to="/predictions"
+              onClick={() => setMobileOpen(false)}
+              className="flex items-center justify-center gap-2 py-3 rounded-full bg-gray-100 dark:bg-zinc-800 text-gray-800 dark:text-gray-200 font-medium hover:bg-gray-200 dark:hover:bg-zinc-700 transition"
+            >
+              <TrendingUp size={16} /> My Predictions
+            </NavLink>
           </motion.div>
         )}
       </AnimatePresence>
     </>
+  );
+}
+
+function MenuItem({ to, icon, label }) {
+  return (
+    <Link
+      to={to}
+      className="flex items-center gap-2 px-4 py-3 text-sm hover:bg-gray-100 dark:hover:bg-zinc-800 transition"
+    >
+      {icon} {label}
+    </Link>
   );
 }

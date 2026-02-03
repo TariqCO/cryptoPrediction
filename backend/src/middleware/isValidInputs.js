@@ -28,9 +28,16 @@ export const isValidInputs = async (req, res, next) => {
 
     // 2️⃣ Check if text logically matches direction
     const isTextValid = await checkValidPrediction(prediction);
-    if (!isTextValid) {
+
+    if (isTextValid === false || isTextValid === "error") {
       return res.status(400).json({
         msg: "📝 Your explanation doesn't align with the chosen direction (Up or Down). Please adjust your reasoning.",
+      });
+    }
+
+    if (isTextValid === "quota_exceeded") {
+      return res.status(503).json({
+        msg: "⚠️ Prediction validation temporarily unavailable due to API quota limits. Please try again later.",
       });
     }
 
@@ -77,7 +84,7 @@ export const isValidInputs = async (req, res, next) => {
     // ✅ All validations passed
     next();
   } catch (error) {
-    console.error("❌ Validation middleware error:", error.message);
+    console.error("❌ Validation middleware error:", error);
     return res.status(500).json({
       msg: "❌ Something went wrong during validation. Please try again.",
     });

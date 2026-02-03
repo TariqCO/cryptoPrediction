@@ -23,6 +23,7 @@ import LiveCryptoPrice from "./ui/LiveCryptoPrice";
 import useLiveCryptoPrice from "../hooks/useLiveCryptoPrice";
 import Notification from "./ui/Notification";
 import { setTF } from "../redux/feature/timeframeSlice";
+import { BarChart3 } from "lucide-react";
 
 const fadeVariant = {
   initial: { opacity: 0, y: 20 },
@@ -95,8 +96,6 @@ export default function MainCenter({ topic, onSubmitSuccess }) {
 
     const todayDateOnly = new Date().toISOString().split("T")[0];
 
-
-
     const newPrediction = {
       direction: choice,
       text,
@@ -117,12 +116,11 @@ export default function MainCenter({ topic, onSubmitSuccess }) {
       });
 
       onSubmitSuccess?.();
-      dispatch(setTF(timeframe))
+      dispatch(setTF(timeframe));
       setNotif({
         type: "success",
         message: "✅ Prediction submitted successfully!",
       });
-
     } catch (err) {
       setNotif({
         type: "error",
@@ -140,8 +138,9 @@ export default function MainCenter({ topic, onSubmitSuccess }) {
       <motion.div key={topic.slug} {...fadeVariant}>
         <Card className="shadow-md rounded-2xl bg-white text-black border border-gray-200 dark:bg-zinc-900 dark:text-zinc-100 dark:border-zinc-700 dark:shadow-[0_0_12px_rgba(255,255,255,0.05)]">
           <CardHeader>
-            <CardTitle className="text-xl font-semibold">
-              📊 Submit Your Prediction
+            <CardTitle className="flex items-center gap-2 text-xl font-semibold">
+              <BarChart3 className="w-5 h-5 text-blue-500" />
+              Submit Your Prediction
             </CardTitle>
           </CardHeader>
 
@@ -161,13 +160,21 @@ export default function MainCenter({ topic, onSubmitSuccess }) {
                   </div>
                   <div className="flex flex-col items-end space-y-1 text-gray-500 dark:text-zinc-400">
                     <LiveCryptoPrice coinName={topic.symbol} text="20px" />
-                    <LiveCryptoPrice coinName={topic.symbol} c={false} text="14px" />
+                    <LiveCryptoPrice
+                      coinName={topic.symbol}
+                      c={false}
+                      text="14px"
+                    />
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <Label>Direction</Label>
-                  <RadioGroup defaultValue="positive" onValueChange={setChoice} className="flex gap-6">
+                  <RadioGroup
+                    defaultValue="positive"
+                    onValueChange={setChoice}
+                    className="flex gap-6"
+                  >
                     <div className="flex items-center gap-2">
                       <RadioGroupItem value="positive" id="up" />
                       <Label htmlFor="up">📈 Up</Label>
@@ -181,19 +188,28 @@ export default function MainCenter({ topic, onSubmitSuccess }) {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="fulfillment">Fulfillment Date & Time (Optional)</Label>
+                    <Label htmlFor="fulfillment">
+                      Fulfillment Date & Time (Optional)
+                    </Label>
                     <Input
                       id="fulfillment"
                       type="datetime-local"
                       className="w-full"
-                      value={fulfillmentDate ? formatDateForInput(fulfillmentDate) : ""}
+                      value={
+                        fulfillmentDate
+                          ? formatDateForInput(fulfillmentDate)
+                          : ""
+                      }
                       onChange={(e) => {
-                        const selected = e.target.value ? new Date(e.target.value) : null;
+                        const selected = e.target.value
+                          ? new Date(e.target.value)
+                          : null;
                         setFulfillmentDate(selected);
 
                         if (selected) {
                           const now = new Date();
-                          const diffInHours = (selected - now) / (1000 * 60 * 60);
+                          const diffInHours =
+                            (selected - now) / (1000 * 60 * 60);
 
                           if (diffInHours <= 24) setTimeFrame("24");
                           else if (diffInHours <= 24 * 7) setTimeFrame("7");
@@ -202,7 +218,12 @@ export default function MainCenter({ topic, onSubmitSuccess }) {
                       }}
                     />
                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                      Will automatically assign timeframe: {timeframe === "24" ? "24h" : timeframe === "7" ? "7d" : "1M"}
+                      Will automatically assign timeframe:{" "}
+                      {timeframe === "24"
+                        ? "24h"
+                        : timeframe === "7"
+                          ? "7d"
+                          : "1M"}
                     </p>
                   </div>
 
@@ -216,7 +237,11 @@ export default function MainCenter({ topic, onSubmitSuccess }) {
                       }}
                     >
                       <SelectTrigger className="w-full">
-                        {timeframe === "24" ? "24 Hours" : timeframe === "7" ? "7 Days" : "1 Month"}
+                        {timeframe === "24"
+                          ? "24 Hours"
+                          : timeframe === "7"
+                            ? "7 Days"
+                            : "1 Month"}
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="24">24 Hours</SelectItem>
@@ -242,7 +267,13 @@ export default function MainCenter({ topic, onSubmitSuccess }) {
 
                 <div className="space-y-2">
                   <Label>Confidence Level ({confidence}%)</Label>
-                  <Slider defaultValue={[70]} max={100} min={0} step={1} onValueChange={(val) => setConfidence(val[0])} />
+                  <Slider
+                    defaultValue={[70]}
+                    max={100}
+                    min={0}
+                    step={1}
+                    onValueChange={(val) => setConfidence(val[0])}
+                  />
                 </div>
 
                 <div className="space-y-2">
@@ -258,22 +289,48 @@ export default function MainCenter({ topic, onSubmitSuccess }) {
                 </div>
 
                 <div className="p-3 rounded-md border bg-gray-100 text-sm text-black/80 dark:bg-zinc-800 dark:text-white/80">
-                  <p><b>Symbol:</b> {topic.symbol}</p>
-                  <p><b>Direction:</b> {choice}</p>
-                  <p><b>Target Price:</b> ${targetPrice}</p>
-                  <p><b>Timeframe:</b> {timeframe === "24" ? "24 Hours" : timeframe === "7" ? "7 Days" : "1 Month"}</p>
-                  <p><b>Confidence:</b> {confidence}%</p>
+                  <p>
+                    <b>Symbol:</b> {topic.symbol}
+                  </p>
+                  <p>
+                    <b>Direction:</b> {choice}
+                  </p>
+                  <p>
+                    <b>Target Price:</b> ${targetPrice}
+                  </p>
+                  <p>
+                    <b>Timeframe:</b>{" "}
+                    {timeframe === "24"
+                      ? "24 Hours"
+                      : timeframe === "7"
+                        ? "7 Days"
+                        : "1 Month"}
+                  </p>
+                  <p>
+                    <b>Confidence:</b> {confidence}%
+                  </p>
                 </div>
 
                 <Button type="submit" disabled={loading} className="w-full">
                   {loading ? "Submitting..." : "Submit Prediction"}
                 </Button>
 
-                <Notification type={notif.type} message={notif.message} onClose={() => setNotif({ ...notif, message: "" })} />
+                <Notification
+                  type={notif.type}
+                  message={notif.message}
+                  onClose={() => setNotif({ ...notif, message: "" })}
+                />
               </form>
             ) : (
               <p className="text-sm text-gray-600 text-center dark:text-gray-400">
-                Please <Link to="/login" className="text-blue-600 dark:text-blue-400 underline">log in</Link> to submit a prediction.
+                Please{" "}
+                <Link
+                  to="/login"
+                  className="text-blue-600 dark:text-blue-400 underline"
+                >
+                  log in
+                </Link>{" "}
+                to submit a prediction.
               </p>
             )}
           </CardContent>
