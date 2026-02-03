@@ -17,7 +17,7 @@ const app = express();
 
 // ──────────── Middleware ────────────
 const corsOptions = {
-  origin: *,
+  origin: "https://crypto-prediction-lake.vercel.app/",
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true,
 };
