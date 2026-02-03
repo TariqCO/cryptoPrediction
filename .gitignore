@@ -1,5 +1,12 @@
 # =========================
-# Dependencies
+# Environment variables
+# =========================
+.env
+.env.local
+.env.*.local
+
+# =========================
+# Node dependencies
 # =========================
 node_modules/
 npm-debug.log*
@@ -8,22 +15,23 @@ yarn-error.log*
 pnpm-debug.log*
 
 # =========================
-# Environment variables
-# =========================
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# =========================
 # Build outputs
 # =========================
 dist/
 build/
-.vite/
-.next/
 out/
+coverage/
+
+# =========================
+# Vite
+# =========================
+.vite/
+
+# =========================
+# Next / Nuxt (if ever used)
+# =========================
+.next/
+.nuxt/
 
 # =========================
 # Logs
@@ -32,42 +40,42 @@ logs/
 *.log
 
 # =========================
-# Runtime data
-# =========================
-pids/
-*.pid
-*.seed
-*.pid.lock
-
-# =========================
 # OS / Editor files
 # =========================
 .DS_Store
 Thumbs.db
-.idea/
-.vscode/
 *.swp
+*.swo
 
 # =========================
-# Testing
+# IDEs
 # =========================
-coverage/
+.vscode/
+.idea/
+*.iml
+
+# =========================
+# Git
+# =========================
+.git/
+.gitignore
+
+# =========================
+# Optional uploads / temp
+# =========================
+uploads/
+temp/
+tmp/
 
 # =========================
 # Backend specific
 # =========================
-uploads/
-tmp/
-.cache/
+backend/node_modules/
+backend/.env
 
 # =========================
 # Frontend specific
 # =========================
-.eslintcache
-.stylelintcache
-
-# =========================
-# Misc
-# =========================
-*.tgz
-*.bak
+frontend/node_modules/
+frontend/dist/
+frontend/.env
