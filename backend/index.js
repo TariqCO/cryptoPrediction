@@ -30,9 +30,9 @@ app.use(express.urlencoded({extended: true}))
 app.use(express.json());
 
 // ──────────── Routes ────────────
-app.use("api/crypto", cryptoRoutes);
-app.use("api/user", userRoutes);
-app.use("api/fetch", fetchCoinRoute);
+app.use("/api/crypto", cryptoRoutes);
+app.use("/api/user", userRoutes);
+app.use("/api/fetch", fetchCoinRoute);
 
 
 // ──────────── PORT Connection ────────────
